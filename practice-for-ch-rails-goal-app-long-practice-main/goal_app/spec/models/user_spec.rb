@@ -9,6 +9,7 @@ RSpec.describe User, type: :model do
   it {should validate_length_of(:password).is_at_least(6)}
   it {should validate_uniqueness_of(:username)}
   it {should validate_uniqueness_of(:session_token)}
+  it {should have_many(:goals)}
 
 
   describe "finds users by credentials" do
@@ -42,10 +43,24 @@ RSpec.describe User, type: :model do
         expect(BCrypt::Password).to receive(:create)
         User.new(username: "mary", password: "lamb")
       end
+
+      it "properly sets the password reader" do
+        user = User.new(username: "mary", password: "lamb")
+        expect(user.password).to eq("lamb")
+      end
     end
   end
 
-
+  describe "session token" do
+    it "assigns a session token if one is not given" do
+      expect(subject.session_token).not_to be_nil 
+    end
+    it "uses '#reset_session_token!' to reset a session token on a user" do
+      old_session_token = subject.session_token 
+      new_session_token = subject.reset_session_token!
+      expect(old_session_token).not_to eq(new_session_token)
+    end
+  end
 end
 
 
